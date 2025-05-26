@@ -12,12 +12,32 @@
     <header>
         <h1>Gerenciamento do Estacionamento</h1>
         <form id="registrarForm">
-            <input type="text" name="placa" id="placa" placeholder="Digite a placa do veículo">
-            <input type="text" name="descricao" id="descricao" placeholder="descreva o veículo">
-
+            <input type="text" pattern="[A-Z]{3}[0-9]{1}[A-Z]{1}[0-9]{2}" id="placa" maxlength="7" placeholder="A/A/A/N/A/N/N" required>
+            <input type="text" list="cores" name="cor" id="cor" placeholder="cor">
+            <datalist id="cores">
+                <option value="#000000">preto</option>
+                <option value="#FFFF00">amarelo</option>
+                <option value="#FFFFFF">branco</option>
+                <option value="#00BFFF">azul</option>
+                <option value="#3333FF">azul-escuro</option>
+                <option value="#6495ED">azul-claro</option>
+                <option value="#00CC00">verde</option>
+                <option value="#006400">verde-escuro</option>
+                <option value="#98FB98">verde-claro</option>
+                <option value="#FF0000">vermelho</option>
+                <option value="#FFC0CB">rosa</option>
+                <option value="FFA500">laranja</option>
+                <option value="#8B4513">marrom</option>
+                <option value="#CC33FF">roxo</option>
+                <option value="#999999">cinza</option>
+                <option value="#990033">vinho</option>
+            </datalist>
             <button id="registrarBTN">Registrar veículo</button>
         </form>
     </header>
+    <main id="estacionamento">
+
+    </main>
 
     <script src="js/home.js" defer></script>
 </body>
