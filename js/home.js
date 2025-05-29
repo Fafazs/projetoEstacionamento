@@ -17,6 +17,7 @@
 const form = document.getElementById('registrarForm');
 const placa = document.getElementById('placa');
 const cor = document.getElementById('cor');
+const tipoVeiculo = document.getElementById('veiculos');
 const historico = JSON.parse(localStorage.getItem('historicoSaida')) || [];
 const veiculos = [];
 const placas = {
@@ -33,17 +34,41 @@ const placas = {
     rioGrandeDoSul: { inicio: 'IAQ', fim: 'JDO' },
 }
 
-//carregando localStorage
+function criarIcone(tipo) {
+    const img = document.createElement('img');
+    img.classList.add('icone');
+
+    if (tipo === 'carro') {
+        img.src = '../data/carro.png';
+    } else if (tipo === 'moto') {
+        img.src = '../data/motocicleta.png';
+    } else if (tipo === 'caminhao') {
+        img.src = '../data/caminhao.png';
+    } else {
+        img.alt = 'Ícone não encontrado';
+    }
+
+    img.style.width = '20px';
+    img.style.marginRight = '8px';
+
+    return img;
+}
+
+
 function renderizarVeiculo(veiculo) {
     const veiculoElement = document.createElement('div');
     veiculoElement.classList.add('veiculo');
-    veiculoElement.innerHTML = `${veiculo.ticket} - ${veiculo.placa} - ${veiculo.horarioEntrada} - ${veiculo.estado}`;
     veiculoElement.style.backgroundColor = veiculo.cor;
 
+    const icone = criarIcone(veiculo.tipo);
+    const texto = document.createElement('span');
+    texto.textContent = ` ${veiculo.ticket} - ${veiculo.tipo} - ${veiculo.placa} - ${veiculo.horarioEntrada} - ${veiculo.estado}`;
     const botao = document.createElement('button');
     botao.textContent = 'Autorizar Saída';
     botao.addEventListener('click', () => autorizarSaida(veiculo.ticket));
-    
+
+    veiculoElement.appendChild(icone);
+    veiculoElement.appendChild(texto);
     veiculoElement.appendChild(botao);
     document.getElementById('estacionamento').appendChild(veiculoElement);
 }
@@ -93,6 +118,7 @@ function criarVeiculo() {
         ticket: Math.floor(Math.random() * 1000000),
         placa: placa.value.toUpperCase(),
         cor: cor.value,
+        tipo: tipoVeiculo.value,
         horarioEntrada: new Date().toLocaleTimeString(),
         autenticado: false,
         horarioSaida: '',
@@ -118,6 +144,7 @@ function registrarEntrada() {
     //limpando os inputs e finalizando a função
     placa.value = '';
     cor.value = '';
+    tipoVeiculo.value = '';
     console.log(veiculos);
     alert('Carro registrado no sistema');
 }
@@ -209,29 +236,58 @@ function autorizarSaida(ticket) {
 }
 
 function adicionarAoHistorico(veiculo) {
-    // Adiciona ao array global
     historico.push(veiculo);
-
-    // Atualiza localStorage
     localStorage.setItem('historicoSaida', JSON.stringify(historico));
 
-    // Renderiza na tela
     const historicoContainer = document.getElementById('historicoSaida');
+
     const item = document.createElement('div');
     item.classList.add('historico-item');
-    item.innerHTML = `
+
+    const cabecalho = document.createElement('div');
+    cabecalho.classList.add('historico-cabecalho');
+
+    const icone = document.createElement('img');
+    icone.classList.add('icone');
+    switch (veiculo.tipo) {
+        case 'carro':
+            icone.src = '../data/carro.png';
+            break;
+        case 'moto':
+            icone.src = '../data/motocicleta.png';
+            break;
+        case 'caminhao':
+            icone.src = '../data/caminhao.png';
+            break;
+        default:
+            icone.src = '/mnt/data/8fa63a8d-a0d2-491c-b1dc-503a075e627a.png'; // ícone default carregado por ti
+    }
+
+    const placaTitulo = document.createElement('span');
+    placaTitulo.textContent = veiculo.placa;
+    placaTitulo.classList.add('placa-titulo');
+
+    const detalhes = document.createElement('div');
+    detalhes.classList.add('historico-detalhes');
+    detalhes.innerHTML = `
         <p><strong>Ticket:</strong> ${veiculo.ticket}</p>
-        <p><strong>Placa:</strong> ${veiculo.placa}</p>
+        <p><strong>Tipo:</strong> ${veiculo.tipo}</p>
         <p><strong>Estado:</strong> ${veiculo.estado}</p>
         <p><strong>Horário de Entrada:</strong> ${veiculo.horarioEntrada}</p>
         <p><strong>Horário de Saída:</strong> ${veiculo.horarioSaida}</p>
         <p><strong>Tempo de Permanência:</strong> ${veiculo.tempoPermanencia}</p>
         <p><strong>Valor Pago:</strong> ${veiculo.valor}</p>
     `;
-    item.style.border = '1px solid #ccc';
-    item.style.padding = '10px';
-    item.style.margin = '10px';
-    item.style.backgroundColor = '#f4f4f4';
+
+    cabecalho.appendChild(icone);
+    cabecalho.appendChild(placaTitulo);
+    item.appendChild(cabecalho);
+    item.appendChild(detalhes);
+
+    // Toggle
+    cabecalho.addEventListener('click', () => {
+        detalhes.classList.toggle('ativo');
+    });
 
     historicoContainer.appendChild(item);
 }

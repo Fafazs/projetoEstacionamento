@@ -20,3 +20,99 @@
   width: 90%;
   text-align: center;
 }
+
+#estacionamento {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+}
+
+.veiculo {
+  display: flex;
+  align-items: center;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  padding: 15px 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  transition: transform 0.2s;
+}
+
+.veiculo:hover {
+  transform: scale(1.02);
+}
+
+.veiculo img.icone {
+  width: 48px;
+  height: 48px;
+  margin-right: 16px;
+}
+
+.veiculo span {
+  flex: 1;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  color: #333;
+}
+
+.veiculo button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: 10px;
+  transition: background-color 0.2s;
+}
+
+.veiculo button:hover {
+  background-color: #45a049;
+}
+
+#historicoSaida {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+}
+
+.historico-item {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.historico-cabecalho {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #f2f2f2;
+}
+
+.historico-cabecalho .icone {
+  width: 36px;
+  height: 36px;
+  margin-right: 12px;
+}
+
+.placa-titulo {
+  font-weight: bold;
+  font-size: 16px;
+  color: #333;
+}
+
+.historico-detalhes {
+  display: none;
+  padding: 10px 16px;
+  background-color: #fafafa;
+}
+
+.historico-detalhes.ativo {
+  display: block;
+}

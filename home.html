@@ -12,7 +12,8 @@
     <header>
         <h1>Gerenciamento do Estacionamento</h1>
         <form id="registrarForm">
-            <input type="text" pattern="[A-Z]{3}[0-9]{1}[A-Z]{1}[0-9]{2}" id="placa" maxlength="7" placeholder="A/A/A/N/A/N/N" required>
+            <input type="text" pattern="[A-Z]{3}[0-9]{1}[A-Z]{1}[0-9]{2}" id="placa" maxlength="7"
+                placeholder="A/A/A/N/A/N/N" required>
             <input type="text" list="cores" name="cor" id="cor" placeholder="cor">
             <datalist id="cores">
                 <option value="#000000">preto</option>
@@ -32,6 +33,14 @@
                 <option value="#999999">cinza</option>
                 <option value="#990033">vinho</option>
             </datalist>
+            <label for="veiculos">Tipo de veículo:</label>
+
+            <select name="veiculos" id="veiculos">
+                <option value=""></option>
+                <option value="moto">moto</option>
+                <option value="carro">carro</option>
+                <option value="caminhao">caminhão</option>
+            </select>
             <button id="registrarBTN">Registrar veículo</button>
         </form>
     </header>
@@ -39,9 +48,10 @@
         <h2>Estacionamento</h2>
 
     </main>
-     <h2>Historico de Saída</h2>
+    <h2>Historico de Saída</h2>
     <div id="historicoSaida"></div>
 
     <script src="js/home.js" defer></script>
 </body>
+
 </html>
