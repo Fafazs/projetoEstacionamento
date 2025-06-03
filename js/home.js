@@ -1,38 +1,45 @@
-//registrar o carro no sistema, precisando de inputs de placa e descrição
-//gerando um ticket com um id unico para cada carro, campos de horario de entrada e saida
-//analisar a placa e prever de qual estado é o veiculo, temos três opções:
-//Paraná, Rio grande do sul e Santa Catarina
-//se o carro for de um estado diferente dos citados, ele será considerado como veiculo estrangeiro
-//a placa deve ser analisada como letra, letra, letra, número, letra, número, número.
-//depois de criar um objeto com as informações do carro, o carro será adicionado a um array de carros 
-//e devera retornar para a pagina o body uma div representando o carro e mostrando suas informações
-//o array de carros será salvo em um arquivo json
-//o arquivo json será salvo em uma pasta chamada "veículosAtivos"
-//Ao sair do sistema, o carro será removido do array de carros e do body e deverá ser
-//contabilizado o tempo de permanencia do carro no estacionamento
-//o tempo de permanencia será calculado a partir do horario de entrada e saida
-//por fim o objeto do carro será removido do array de carros e salvo em um arquivo json
-//o arquivo json será salvo em uma pasta chamada "veículosRemovidos"
-
+//função Home.js
 const form = document.getElementById('registrarForm');
 const placa = document.getElementById('placa');
 const cor = document.getElementById('cor');
+const estacionamento = document.getElementById('estacionamento');
 const tipoVeiculo = document.getElementById('veiculos');
 const historico = JSON.parse(localStorage.getItem('historicoSaida')) || [];
 const veiculos = [];
 const placas = {
-    santaCatarina1: { inicio: 'LWR', fim: 'MMM' },
-    santaCatarina2: { inicio: 'OKD', fim: 'OKH' },
-    santaCatarina3: { inicio: 'QHA', fim: 'QJZ' },
-    santaCatarina4: { inicio: 'QTK', fim: 'QTM' },
-    santaCatarina5: { inicio: 'RAA', fim: 'RAJ' },
-    santaCatarina6: { inicio: 'RDS', fim: 'REB' },
-    santaCatarina7: { inicio: 'RKW', fim: 'RLP' },
-    santaCatarina8: { inicio: 'RXK', fim: 'RYI' },
-    parana1: { inicio: 'RHA', fim: 'RHZ' },
-    parana2: { inicio: 'AAA', fim: 'BEZ' },
-    rioGrandeDoSul: { inicio: 'IAQ', fim: 'JDO' },
+    santaCatarina: [
+        { inicio: 'LWR', fim: 'MMM' },
+        { inicio: 'OKD', fim: 'OKH' },
+        { inicio: 'QHA', fim: 'QJZ' },
+        { inicio: 'QTK', fim: 'QTM' },
+        { inicio: 'RAA', fim: 'RAJ' },
+        { inicio: 'RDS', fim: 'REB' },
+        { inicio: 'RKW', fim: 'RLP' },
+        { inicio: 'RXK', fim: 'RYI' },
+    ],
+    parana: [
+        { inicio: 'RHA', fim: 'RHZ' },
+        { inicio: 'AAA', fim: 'BEZ' },
+    ],
+    rioGrandeDoSul: [
+        { inicio: 'IAQ', fim: 'JDO' },
+    ]
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+    const dadosSalvos = JSON.parse(localStorage.getItem('veiculos')) || [];
+
+    // Carrega os veículos salvos no array principal
+    dadosSalvos.forEach(veiculo => {
+        veiculos.push(veiculo);
+    });
+
+    // Renderiza toda a matriz do estacionamento com os veículos carregados
+    renderizarEstacionamento();
+
+    // Renderiza o histórico salvo
+    renderizarHistorico(historico)
+});
 
 function criarIcone(tipo) {
     const img = document.createElement('img');
@@ -48,84 +55,157 @@ function criarIcone(tipo) {
         img.alt = 'Ícone não encontrado';
     }
 
-    img.style.width = '20px';
-    img.style.marginRight = '8px';
-
     return img;
 }
 
+function renderizarEstacionamento() {
+    estacionamento.innerHTML = ''; // limpa o conteúdo antes de renderizar
+    const h2 = document.createElement('h2');
+    h2.textContent = 'Estacionamento';
+    h2.style.textAlign = 'center';
+    estacionamento.appendChild(h2);
+    let indexVeiculo = 0;
 
-function renderizarVeiculo(veiculo) {
+    for (let i = 0; i < 5; i++) {
+        const linha = document.createElement('div');
+        linha.classList.add('linha');
+        linha.setAttribute('id', `linha${i}`);
+
+        for (let j = 0; j < 5; j++) {
+            const vaga = document.createElement('div');
+            vaga.classList.add('vaga');
+            vaga.setAttribute('id', `vaga${i}${j}`);
+
+            // Se ainda há veículos para renderizar
+            const veiculo = veiculos[indexVeiculo];
+            if (veiculo) {
+                veiculo.vagaID = `vaga${i}${j}`;
+                renderizarVeiculo(vaga, veiculo);
+                indexVeiculo++;
+            }
+
+            linha.appendChild(vaga);
+        }
+
+        estacionamento.appendChild(linha);
+    }
+}
+
+function verVeiculo(veiculo) {
+    const objeto = document.createElement('div');
+    objeto.classList.add('janela-overlay'); // fundo escuro
+    objeto.style.display = 'flex';
+    objeto.style.flexDirection = 'column';
+    objeto.style.gap = '10px';
+
+    const conteudos = document.createElement('div');
+    conteudos.classList.add('janela-conteudo');
+
+    // caixa no centro
+
+    conteudos.innerHTML = `
+        Ticket: ${veiculo.ticket}<br>
+        Placa: ${veiculo.placa}<br>
+        Tipo: ${veiculo.tipo}<br>
+        Estado: ${veiculo.estado}<br>
+        hora de entrada: ${veiculo.horarioEntrada}<br>
+        <br>
+        ${veiculo.vagaID.toUpperCase()}
+    `;
+
+    // botão de confirmar
+    const botaoConfirmar = document.createElement('button');
+    botaoConfirmar.textContent = 'Autorizar Saída';
+    botaoConfirmar.addEventListener('click', () => criarJanela(veiculo.ticket));
+
+    // botão de cancelar
+    const botaoCancelar = document.createElement('button');
+    botaoCancelar.textContent = 'Cancelar';
+    botaoCancelar.addEventListener('click', () => {
+        objeto.style.display = 'none';
+    });
+
+    objeto.appendChild(conteudos);
+    objeto.appendChild(botaoConfirmar);
+    objeto.appendChild(botaoCancelar);
+    estacionamento.appendChild(objeto);
+
+    if (veiculo.autenticado == true) {
+        botaoConfirmar.style.display = 'none';
+    }
+
+}
+
+function renderizarVeiculo(vaga, veiculo) {
+
     const veiculoElement = document.createElement('div');
     veiculoElement.classList.add('veiculo');
-    veiculoElement.style.backgroundColor = veiculo.cor;
+    veiculoElement.style.borderColor = veiculo.cor;
 
     const icone = criarIcone(veiculo.tipo);
     const texto = document.createElement('span');
-    texto.textContent = ` ${veiculo.ticket} - ${veiculo.tipo} - ${veiculo.placa} - ${veiculo.horarioEntrada} - ${veiculo.estado}`;
-    const botao = document.createElement('button');
-    botao.textContent = 'Autorizar Saída';
-    botao.addEventListener('click', () => autorizarSaida(veiculo.ticket));
+    texto.innerHTML = `${veiculo.placa} <br> ${veiculo.vagaID.toUpperCase()}`;
+    veiculoElement.onclick = () => verVeiculo(veiculo);
 
     veiculoElement.appendChild(icone);
     veiculoElement.appendChild(texto);
-    veiculoElement.appendChild(botao);
-    document.getElementById('estacionamento').appendChild(veiculoElement);
+    vaga.appendChild(veiculoElement);
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    const dadosSalvos = JSON.parse(localStorage.getItem('veiculos')) || [];
-    dadosSalvos.forEach(veiculo => {
-        veiculos.push(veiculo);
-        renderizarVeiculo(veiculo);
-    });
-    historico.forEach(veiculo => {
-    adicionarAoHistorico(veiculo);
-});
-});
+function verificarEstado(letras) {
+    letras = letras.toUpperCase().trim();
 
-function verificarEstado(Letras) {
-    if (Letras >= placas.santaCatarina1.inicio && Letras <= placas.santaCatarina1.fim) {
-        return 'Santa Catarina';
-    } else if (Letras >= placas.santaCatarina2.inicio && Letras <= placas.santaCatarina2.fim) {
-        return 'Santa Catarina';
-    } else if (Letras >= placas.santaCatarina3.inicio && Letras <= placas.santaCatarina3.fim) {
-        return 'Santa Catarina';
-    } else if (Letras >= placas.santaCatarina4.inicio && Letras <= placas.santaCatarina4.fim) {
-        return 'Santa Catarina';
-    } else if (Letras >= placas.santaCatarina5.inicio && Letras <= placas.santaCatarina5.fim) {
-        return 'Santa Catarina';
-    } else if (Letras >= placas.santaCatarina6.inicio && Letras <= placas.santaCatarina6.fim) {
-        return 'Santa Catarina';
-    } else if (Letras >= placas.santaCatarina7.inicio && Letras <= placas.santaCatarina7.fim) {
-        return 'Santa Catarina';
-    } else if (Letras >= placas.santaCatarina8.inicio && Letras <= placas.santaCatarina8.fim) {
-        return 'Santa Catarina';
-    } else if (Letras >= placas.parana1.inicio && Letras <= placas.parana1.fim) {
-        return 'Paraná';
-    } else if (Letras >= placas.parana2.inicio && Letras <= placas.parana2.fim) {
-        return 'Paraná';
-    } else if (Letras >= placas.rioGrandeDoSul.inicio && Letras <= placas.rioGrandeDoSul.fim) {
-        return 'Rio Grande do Sul';
-    } else {
-        return 'Estrangeiro';
-    }
+    const estaNoIntervalo = (prefixo, inicio, fim) => {
+        return prefixo >= inicio && prefixo <= fim;
+    };
+
+    const verificarPorEstado = (estadoPlacas) => {
+        return estadoPlacas.some(({ inicio, fim }) => estaNoIntervalo(letras, inicio, fim));
+    };
+
+    if (verificarPorEstado(placas.santaCatarina)) return 'Santa Catarina';
+    if (verificarPorEstado(placas.parana)) return 'Paraná';
+    if (verificarPorEstado(placas.rioGrandeDoSul)) return 'Rio Grande do Sul';
+    return 'Estrangeiro';
+}
+
+function gerarTicketUnico() {
+    let ticket;
+    do {
+        ticket = Math.floor(Math.random() * 1000000);
+    } while (veiculos.some(v => v.ticket === ticket));
+    return ticket;
 }
 
 function criarVeiculo() {
     const letras = placa.value.substring(0, 3).toUpperCase();
+    console.log(letras);
     return {
-        ticket: Math.floor(Math.random() * 1000000),
+        ticket: gerarTicketUnico(),
         placa: placa.value.toUpperCase(),
         cor: cor.value,
         tipo: tipoVeiculo.value,
-        horarioEntrada: new Date().toLocaleTimeString(),
+        horarioEntrada: formatarDataCompleta(new Date().toISOString()),
         autenticado: false,
         horarioSaida: '',
         tempoPermanencia: '',
         estado: verificarEstado(letras),
         valor: ''
     };
+}
+
+function formatarDataCompleta(isoString) {
+    const data = new Date(isoString);
+
+    const dia = String(data.getDate()).padStart(2, '0');
+    const mes = String(data.getMonth() + 1).padStart(2, '0'); // mês começa em 0
+    const ano = data.getFullYear();
+
+    const horas = String(data.getHours()).padStart(2, '0');
+    const minutos = String(data.getMinutes()).padStart(2, '0');
+    const segundos = String(data.getSeconds()).padStart(2, '0');
+
+    return `${dia}/${mes}/${ano} ${horas}:${minutos}:${segundos}`;
 }
 
 function registrarEntrada() {
@@ -136,7 +216,7 @@ function registrarEntrada() {
     veiculos.push(veiculo);
 
     //criando o elemento veiculo
-    renderizarVeiculo(veiculo);
+    renderizarEstacionamento();
 
     //salvando o veiculo no localStorage
     localStorage.setItem('veiculos', JSON.stringify(veiculos));
@@ -149,27 +229,41 @@ function registrarEntrada() {
     alert('Carro registrado no sistema');
 }
 
-//criar janela
 function calcularTempoPermanencia(veiculo) {
-    const entrada = new Date(`1970-01-01T${veiculo.horarioEntrada}`);
-    const saida = new Date(`1970-01-01T${veiculo.horarioSaida}`);
-    const diff = (saida - entrada) / 60000; // em minutos
-    return `${Math.floor(diff)} min`;
+    const entrada = Date.parse(veiculo.horarioEntrada);
+    const saida = Date.parse(veiculo.horarioSaida);
+
+    if (isNaN(entrada) || isNaN(saida)) {
+        return 'Horário inválido';
+    }
+
+    const diffMin = Math.floor((saida - entrada) / 60000); // diferença em minutos
+
+    if (diffMin < 0) {
+        return 'Saída antes da entrada';
+    }
+
+    const horas = Math.floor(diffMin / 60);
+    const minutos = diffMin % 60;
+
+    return veiculo.tempoPermanencia = { 
+        horas: horas,
+        minutos: minutos,
+        diffMin: diffMin
+    };
 }
 
-function calcularValor(veiculo){
-    const entrada = new Date(`1970-01-01T${veiculo.horarioEntrada}`);
-    const saida = new Date(`1970-01-01T${veiculo.horarioSaida}`);
-    const diffMinutos = (saida - entrada) / (1000 * 60);
+function calcularValor(veiculo) {
+    const tempoPermanencia = veiculo.tempoPermanencia.diffMin;
 
     let resultado;
-    if (diffMinutos <= 15){
+    if (tempoPermanencia <= 15) {
         resultado = 0;
-    }else if (diffMinutos <= 180){
+    } else if (tempoPermanencia <= 180) {
         resultado = 10;
-    }else if (diffMinutos > 180){
-        const aMais = diffMinutos - 180
-        const meiaHora = Math.ceil(aMais/30);
+    } else if (tempoPermanencia > 180) {
+        const aMais = tempoPermanencia - 180
+        const meiaHora = Math.ceil(aMais / 30);
         const valor = 10 + (meiaHora * 1.5);
         resultado = valor;
     }
@@ -200,40 +294,35 @@ function criarJanela(ticket) {
     const ticketInput = conteudo.querySelector('#ticket');
 
     botaoConfirmar.addEventListener('click', () => {
-    const ticketDigitado = ticketInput.value;
-    const veiculoIndex = veiculos.findIndex(v => v.ticket === parseInt(ticketDigitado));
-    const veiculo = veiculos[veiculoIndex];
-    
-    if (veiculo) {
-        veiculo.autenticado = true;
-        veiculo.horarioSaida = new Date().toLocaleTimeString();
-        veiculo.tempoPermanencia = calcularTempoPermanencia(veiculo);
-        veiculo.valor = calcularValor(veiculo);
+        const ticketDigitado = ticketInput.value;
+        const veiculoIndex = veiculos.findIndex(v => v.ticket === parseInt(ticketDigitado));
+        const veiculo = veiculos[veiculoIndex];
 
-        // Remover da visualização do estacionamento
-        const estacionamento = document.getElementById('estacionamento');
-        const veiculosDivs = estacionamento.querySelectorAll('.veiculo');
-        veiculosDivs.forEach(div => {
-            if (div.textContent.includes(veiculo.ticket.toString())) {
-                div.remove();
-            }
-        });
+        if (veiculo) {
+            veiculo.autenticado = true;
+            veiculo.horarioSaida = formatarDataCompleta(new Date().toISOString());
+            veiculo.tempoPermanencia = calcularTempoPermanencia(veiculo);
+            veiculo.valor = calcularValor(veiculo);
 
-        // Adicionar ao histórico
-        adicionarAoHistorico(veiculo);
 
-        // Remover do array
-        veiculos.splice(veiculoIndex, 1);
+            // Adicionar ao histórico
+            historico.push(veiculo);
+            localStorage.setItem('historicoSaida', JSON.stringify(historico));
+            renderizarHistorico(historico);
 
-        // Atualizar localStorage
-        localStorage.setItem('veiculos', JSON.stringify(veiculos));
+            // Remover do array e do estacionamento
+            veiculos.splice(veiculoIndex, 1);
+            renderizarEstacionamento();
 
-        janela.remove();
-        alert('Ticket autenticado com sucesso!');
-    } else {
-        alert('Ticket não encontrado!');
-    }
-});
+            // Atualizar localStorage
+            localStorage.setItem('veiculos', JSON.stringify(veiculos));
+
+            janela.remove();
+            alert('Ticket autenticado com sucesso!');
+        } else {
+            alert('Ticket não encontrado!');
+        }
+    });
 
     botaoCancelar.addEventListener('click', () => {
         janela.remove();
@@ -242,38 +331,14 @@ function criarJanela(ticket) {
     document.body.appendChild(janela);
 }
 
-
-function autorizarSaida(ticket) {
-    criarJanela(ticket);
-}
-
-function adicionarAoHistorico(veiculo) {
-    historico.push(veiculo);
-    localStorage.setItem('historicoSaida', JSON.stringify(historico));
-
-    const historicoContainer = document.getElementById('historicoSaida');
-
+function adicionarAoHistorico(veiculo, historicoContainer) {
     const item = document.createElement('div');
     item.classList.add('historico-item');
 
     const cabecalho = document.createElement('div');
     cabecalho.classList.add('historico-cabecalho');
 
-    const icone = document.createElement('img');
-    icone.classList.add('icone');
-    switch (veiculo.tipo) {
-        case 'carro':
-            icone.src = '../data/carro.png';
-            break;
-        case 'moto':
-            icone.src = '../data/motocicleta.png';
-            break;
-        case 'caminhao':
-            icone.src = '../data/caminhao.png';
-            break;
-        default:
-            icone.src = '/mnt/data/8fa63a8d-a0d2-491c-b1dc-503a075e627a.png'; // ícone default carregado por ti
-    }
+    const icone = criarIcone(veiculo.tipo);
 
     const placaTitulo = document.createElement('span');
     placaTitulo.textContent = veiculo.placa;
@@ -287,7 +352,7 @@ function adicionarAoHistorico(veiculo) {
         <p><strong>Estado:</strong> ${veiculo.estado}</p>
         <p><strong>Horário de Entrada:</strong> ${veiculo.horarioEntrada}</p>
         <p><strong>Horário de Saída:</strong> ${veiculo.horarioSaida}</p>
-        <p><strong>Tempo de Permanência:</strong> ${veiculo.tempoPermanencia}</p>
+        <p><strong>Tempo de Permanência:</strong> ${veiculo.tempoPermanencia.horas} horas - ${veiculo.tempoPermanencia.minutos} min</p>
         <p><strong>Valor Pago:</strong> ${veiculo.valor}</p>
     `;
 
@@ -296,7 +361,6 @@ function adicionarAoHistorico(veiculo) {
     item.appendChild(cabecalho);
     item.appendChild(detalhes);
 
-    // Toggle
     cabecalho.addEventListener('click', () => {
         detalhes.classList.toggle('ativo');
     });
@@ -304,8 +368,90 @@ function adicionarAoHistorico(veiculo) {
     historicoContainer.appendChild(item);
 }
 
+function renderizarHistorico(historico) {
+    const historicoContainer = document.getElementById('historicoSaida');
+    historicoContainer.innerHTML = '';
+
+    historico.forEach(veiculo => {
+        adicionarAoHistorico(veiculo, historicoContainer);
+    });
+}
+
 form.addEventListener('submit', (e) => {
     e.preventDefault();
     registrarEntrada();
 });
+
+// Adicionar os veículos mockados ao localStorage
+
+if (!localStorage.getItem('veiculos')) {
+  const veiculosMock = [
+    {
+        ticket: gerarTicketUnico(),
+        placa: 'SAR6A21',
+        cor: '#000000',
+        tipo: 'moto',
+        horarioEntrada: formatarDataCompleta(new Date(Date.now() - 10 * 60 * 1000).toISOString()), // 10 min atrás
+        autenticado: false,
+        horarioSaida: '',
+        tempoPermanencia: '',
+        estado: verificarEstado('AAA'),
+        valor: ''
+    },
+    {
+        ticket: gerarTicketUnico(),
+        placa: 'RYI9L00',
+        cor: '#FF0000',
+        tipo: 'moto',
+        horarioEntrada: formatarDataCompleta(new Date(Date.now() - 30 * 60 * 1000).toISOString()), // 30 min atrás
+        autenticado: false,
+        horarioSaida: '',
+        tempoPermanencia: '',
+        estado: verificarEstado('BBB'),
+        valor: ''
+    },
+    {
+        ticket: gerarTicketUnico(),
+        placa: 'MMM7Z88',
+        cor: 'preto',
+        tipo: 'carro',
+        horarioEntrada: formatarDataCompleta(new Date(Date.now() - 90 * 60 * 1000).toISOString()), // 1h30 atrás
+        autenticado: false,
+        horarioSaida: '',
+        tempoPermanencia: '',
+        estado: verificarEstado('CCC'),
+        valor: ''
+    },
+    {
+        ticket: gerarTicketUnico(),
+        placa: 'IBZ2F88',
+        cor: '#006400',
+        tipo: 'caminhao',
+        horarioEntrada: formatarDataCompleta(new Date(Date.now() - 180 * 60 * 1000).toISOString()), // 3h atrás
+        autenticado: false,
+        horarioSaida: '',
+        tempoPermanencia: '',
+        estado: verificarEstado('DDD'),
+        valor: ''
+    },
+    {
+        ticket: gerarTicketUnico(),
+        placa: 'RHZ0Q12',
+        cor: "#999999",
+        tipo: 'carro',
+        horarioEntrada: formatarDataCompleta(new Date(Date.now() - 300 * 60 * 1000).toISOString()), // 5h atrás
+        autenticado: false,
+        horarioSaida: '',
+        tempoPermanencia: '',
+        estado: verificarEstado('EEE'),
+        valor: ''
+    }
+  ];
+
+  localStorage.setItem('veiculos', JSON.stringify(veiculosMock));
+  localStorage.setItem('historicoSaida', JSON.stringify([]));
+}
+
+
+
 

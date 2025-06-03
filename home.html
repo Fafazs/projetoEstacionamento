@@ -10,10 +10,10 @@
 
 <body id="home">
     <header>
-        <h1>Gerenciamento do Estacionamento</h1>
+        <h1 id="homeH1">Gerenciamento do Estacionamento</h1>
         <form id="registrarForm">
             <input type="text" pattern="[A-Z]{3}[0-9]{1}[A-Z]{1}[0-9]{2}" id="placa" maxlength="7"
-                placeholder="A/A/A/N/A/N/N" required>
+                placeholder="L/L/L/N/L/N/N" required>
             <input type="text" list="cores" name="cor" id="cor" placeholder="cor">
             <datalist id="cores">
                 <option value="#000000">preto</option>
@@ -45,10 +45,18 @@
         </form>
     </header>
     <main id="estacionamento">
-        <h2>Estacionamento</h2>
 
     </main>
-    <h2>Historico de Saída</h2>
+    <button onclick="limparHistorico()">Apagar Todo o histórico</button>
+
+    <script>
+        function limparHistorico() {
+            localStorage.clear('historicoSaida'); // apaga do localStorage
+            document.getElementById('historicoSaida').innerHTML = ''; // limpa do DOM também
+            alert('Histórico de saída apagado.');
+        }
+    </script>
+    <h2 id="historicoSaidaH2">Historico de Saída</h2>
     <div id="historicoSaida"></div>
 
     <script src="js/home.js" defer></script>
