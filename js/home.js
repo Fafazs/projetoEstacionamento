@@ -395,7 +395,7 @@ if (!localStorage.getItem('veiculos')) {
         autenticado: false,
         horarioSaida: '',
         tempoPermanencia: '',
-        estado: verificarEstado('AAA'),
+        estado: verificarEstado('SAR'),
         valor: ''
     },
     {
@@ -407,7 +407,7 @@ if (!localStorage.getItem('veiculos')) {
         autenticado: false,
         horarioSaida: '',
         tempoPermanencia: '',
-        estado: verificarEstado('BBB'),
+        estado: verificarEstado('RYI'),
         valor: ''
     },
     {
@@ -419,7 +419,7 @@ if (!localStorage.getItem('veiculos')) {
         autenticado: false,
         horarioSaida: '',
         tempoPermanencia: '',
-        estado: verificarEstado('CCC'),
+        estado: verificarEstado('MMM'),
         valor: ''
     },
     {
@@ -431,7 +431,7 @@ if (!localStorage.getItem('veiculos')) {
         autenticado: false,
         horarioSaida: '',
         tempoPermanencia: '',
-        estado: verificarEstado('DDD'),
+        estado: verificarEstado('IBZ'),
         valor: ''
     },
     {
@@ -443,7 +443,7 @@ if (!localStorage.getItem('veiculos')) {
         autenticado: false,
         horarioSaida: '',
         tempoPermanencia: '',
-        estado: verificarEstado('EEE'),
+        estado: verificarEstado('RHZ'),
         valor: ''
     }
   ];
